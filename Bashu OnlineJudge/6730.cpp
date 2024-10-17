@@ -1,0 +1,81 @@
+#include<iostream>
+#include<iomanip>
+#include<cmath>
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+#include<cstdlib>
+#include<stack>
+#include<queue>
+#include<map>
+#include<ctime>
+#include<vector>
+#define ll long long
+#define lson num<<1,l,mid
+#define rson num<<1|1,mid+1,r
+using namespace std;
+const int inf=0x3f3f3f3f;
+const int N=6e5+5;
+const int P=26;
+int read(){
+	int s=0,f=1;char c=getchar();
+	while(c<'0'||c>'9'){if(c=='-')f=-1;c=getchar();}
+	while(c>='0'&&c<='9'){s=s*10+c-'0';c=getchar();}
+	return s*f;
+}
+int n,m,tot;
+int a[N],s[N],root[N];
+struct Trie{int ch[2],s;}t[N*P];
+int Insert(int x,int data){
+	int rt=++tot;
+	int y=rt;
+	for(int i=P-1;i>=0;i--){
+		t[y].ch[0]=t[x].ch[0];
+		t[y].ch[1]=t[x].ch[1];
+		t[y].s=t[x].s+1;
+		int c=(data>>i)&1;
+		x=t[x].ch[c];
+		y=t[y].ch[c]=++tot;
+	}
+	t[y].s=t[x].s+1;
+	return rt;
+}
+int Ask(int x,int y,int data){
+	int ans=0;
+	for(int i=P-1;i>=0;i--){
+		int c=(data>>i)&1;
+		if(t[t[y].ch[!c]].s-t[t[x].ch[!c]].s>0){
+			x=t[x].ch[!c];y=t[y].ch[!c];
+			ans+=(1<<i);
+		}
+		else{
+			x=t[x].ch[c];y=t[y].ch[c];
+		}
+	}
+	return ans;
+}
+int main(){
+//  freopen("_.in","r",stdin);
+//  freopen("_.out","w",stdout);
+	n=read()+1;m=read();
+	root[1]=Insert(0,0);
+	for(int i=2;i<=n;i++){
+		a[i]=read();
+		s[i]=s[i-1]^a[i];
+		root[i]=Insert(root[i-1],s[i]);
+	}
+	while(m--){
+		char op[2];
+		scanf("%s",op);
+		if(op[0]=='A'){
+			a[++n]=read();
+			s[n]=s[n-1]^a[n];
+			root[n]=Insert(root[n-1],s[n]);
+		}
+		if(op[0]=='Q'){
+			int l=read(),r=read(),x=read();
+			printf("%d\n",Ask(root[l-1],root[r],s[n]^x));
+		}
+	}
+	return 0;
+}
